@@ -34,12 +34,12 @@ font = pygame.font.SysFont("Verdana", 60)
 font_small = pygame.font.SysFont("Verdana", 20)
 game_over = font.render("Game Over", True, BLACK)
 
-background = pygame.image.load(os.path.join('PygameTutorial_3_0', 'AnimatedStreet.png'))
+background = pygame.image.load('AnimatedStreet.png')
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        enemy_sprite_url = os.path.join('PygameTutorial_3_0', 'Enemy.png')
+        enemy_sprite_url = 'Enemy.png'
         self.image = pygame.image.load(enemy_sprite_url)
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(ENEMY_BOUNDARY, SCREEN_WIDTH - ENEMY_BOUNDARY), 0)
@@ -58,7 +58,7 @@ class Enemy(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        player_sprite_url = os.path.join('PygameTutorial_3_0', 'Player.png')
+        player_sprite_url = 'Player.png'
         self.image = pygame.image.load(player_sprite_url)
         self.rect = self.image.get_rect()
         self.rect.center = (160, 520)
@@ -93,7 +93,7 @@ pygame.time.set_timer(INC_SPEED, 3000)
 
 
 pygame.mixer.init()
-pygame.mixer.music.load(os.path.join('PygameTutorial_3_0', 'background.wav'))
+pygame.mixer.music.load('background.wav')
 pygame.mixer.music.play(-1,0.0)
 
 # Game Loop
@@ -118,7 +118,7 @@ while True:
         entity.move()
 
     if pygame.sprite.spritecollideany(P1, enemies):
-        pygame.mixer.Sound(os.path.join('PygameTutorial_3_0', 'crash.wav')).play()
+        pygame.mixer.Sound('crash.wav').play()
         time.sleep(0.5)
 
         DISPLAYSURF.fill(RED)
