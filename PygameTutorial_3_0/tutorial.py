@@ -8,7 +8,6 @@ pygame.init()
 BLACK = pygame.Color(0, 0, 0)
 WHITE = pygame.Color(255, 255, 255)
 GREY = pygame.Color(128, 128, 128)
-GREY_TRANSLUCENT = pygame.Color(128, 128, 128, a=0.5)
 RED = pygame.Color(255, 0, 0)
 GREEN = pygame.Color(0, 255, 0)
 BLUE = pygame.Color(0, 0, 255)
@@ -33,6 +32,9 @@ SCORE = 0
 font = pygame.font.SysFont("Verdana", 60)
 font_small = pygame.font.SysFont("Verdana", 20)
 game_over = font.render("Game Over", True, BLACK)
+game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+game_over_screen_fade.fill((0, 0, 0))
+game_over_screen_fade.set_alpha(160)
 
 background = pygame.image.load('AnimatedStreet.png')
 
@@ -121,7 +123,7 @@ while True:
         pygame.mixer.Sound('crash.wav').play()
         time.sleep(0.5)
 
-        DISPLAYSURF.fill(RED)
+        DISPLAYSURF.blit(game_over_screen_fade, (0,0))
         DISPLAYSURF.blit(game_over, (30,200))
         game_over_score = font.render(f'Score: {SCORE}', True, BLACK)
         DISPLAYSURF.blit(game_over_score, (30,260))
