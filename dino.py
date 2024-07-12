@@ -24,11 +24,12 @@ DISPLAYSURF.fill(WHITE)
 pygame.display.set_caption('Dinosaur Game')
 
 # Sounds
-jump_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', 'jump.mp3'))
 points_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', '100points.mp3'))
+jump_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', 'jump.mp3'))
 
 # Game Variables
 SPEED = round(SCREEN_WIDTH/250)
+SPEED_DELTA = SPEED*0.0005
 GRAVITY = round(SCREEN_HEIGHT/250)
 SCORE = 0
 
@@ -56,10 +57,14 @@ RUNNING_DINO_Y = GROUND_Y - (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
 JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*1.5
 DUCKING_DINO_Y = GROUND_Y + (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
 
+# Groups
+cloud_group = pygame.sprite.Group()
+dino_group = pygame.sprite.GroupSingle()
+
 # Object Classes
 class Cloud(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
+        super().__init__((cloud_group))
         cloud_sprite_url = os.path.join('assets', 'cloud.png')
         self.image = pygame.transform.scale(pygame.image.load(cloud_sprite_url), (CLOUD_WIDTH, CLOUD_HEIGHT))
         self.x_pos = SCREEN_WIDTH + round(SCREEN_WIDTH//12, -1)
@@ -71,7 +76,7 @@ class Cloud(pygame.sprite.Sprite):
 
 class Dino(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
+        super().__init__((dino_group))
 
         self.running_sprites = [
             pygame.transform.scale(
@@ -122,17 +127,12 @@ class Dino(pygame.sprite.Sprite):
         else:
             self.image = self.running_sprites[int(self.current_image)]
 
-# Groups
-cloud_group = pygame.sprite.Group()
-dino_group = pygame.sprite.GroupSingle()
-
 # Events
 CLOUD_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(CLOUD_EVENT, 3000)
 
 # Objects
 dinosaur = Dino()
-dino_group.add(dinosaur)
 
 # Game Loop
 while True:
@@ -148,14 +148,13 @@ while True:
             sys.exit()
         if event.type == CLOUD_EVENT:
             current_cloud = Cloud()
-            cloud_group.add(current_cloud)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                 dinosaur.jump()
     
     DISPLAYSURF.fill(WHITE)
 
-    SPEED += 0.0025
+    SPEED += SPEED_DELTA
     if int(SCORE) % 100 == 0 and int(SCORE) > 0:
         points_sfx.play()
 
