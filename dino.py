@@ -25,10 +25,15 @@ pygame.display.set_caption('Dinosaur Game')
 
 # Sounds
 jump_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', 'jump.mp3'))
+points_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', '100points.mp3'))
 
 # Game Variables
 SPEED = round(SCREEN_WIDTH/250)
 GRAVITY = round(SCREEN_HEIGHT/250)
+SCORE = 0
+
+# Fonts
+font = pygame.font.Font(os.path.join('assets', 'PressStart2P-Regular.ttf'), 24)
 
 # Ground
 ground = pygame.image.load(os.path.join('assets', 'ground.png'))
@@ -149,6 +154,15 @@ while True:
                 dinosaur.jump()
     
     DISPLAYSURF.fill(WHITE)
+
+    SPEED += 0.0025
+    if int(SCORE) % 100 == 0 and int(SCORE) > 0:
+        points_sfx.play()
+
+    SCORE += 0.1
+    player_score_surface = font.render(
+        str(int(SCORE)), True, (BLACK))
+    DISPLAYSURF.blit(player_score_surface, (SCREEN_WIDTH*0.9, 10))
 
     # Draw Cloud
     cloud_group.update()
