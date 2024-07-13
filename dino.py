@@ -37,6 +37,7 @@ OBSTACLE_TIMER = 0
 OBSTACLE_COOLDOWN = 1000
 OBSTACLE_COOLDOWN_DELTA = 0
 GAME_OVER = False
+OUTLINES = False
 
 # Fonts
 font = pygame.font.Font(os.path.join('assets', 'PressStart2P-Regular.ttf'), 24)
@@ -106,6 +107,8 @@ class Obstacle(pygame.sprite.Sprite):
     def update(self):
         self.x_pos -= SPEED
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+        if OUTLINES:
+            pygame.draw.rect(self.image, RED, [0, 0, self.image.get_width(), self.image.get_height()], 1)
 
 class Cactus(Obstacle):
     def __init__(self):
@@ -185,6 +188,8 @@ class Dino(pygame.sprite.Sprite):
     def update(self):
         self.animate()
         self.apply_gravity()
+        if OUTLINES:
+            pygame.draw.rect(self.image, RED, [0, 0, self.image.get_width(), self.image.get_height()], 1)
 
     def animate(self):
         self.current_image += 0.05
