@@ -51,6 +51,7 @@ GROUND_Y = 3*SCREEN_HEIGHT//4
 # Cloud Dimensions
 CLOUD_WIDTH = round(min(200, SCREEN_WIDTH//6), -1)
 CLOUD_HEIGHT = round(min(80, SCREEN_HEIGHT//9), -1)
+CLOUD_X = SCREEN_WIDTH + round(SCREEN_WIDTH//12, -1)
 CLOUD_Y_MAX = round(SCREEN_HEIGHT//2, -1)
 CLOUD_Y_MIN = round(SCREEN_HEIGHT//5, -1)
 
@@ -59,6 +60,7 @@ RUNNING_DINO_WIDTH = round(min(80, SCREEN_WIDTH//16), -1)
 RUNNING_DINO_HEIGHT = round(min(90, SCREEN_HEIGHT//8), -1)
 DUCKING_DINO_WIDTH = round(min(110, SCREEN_WIDTH//12), -1)
 DUCKING_DINO_HEIGHT = round(min(60, SCREEN_HEIGHT//12), -1)
+DINO_X = round(min(200, SCREEN_WIDTH//6), -1)
 RUNNING_DINO_Y = GROUND_Y - (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
 JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*2.75
 DUCKING_DINO_Y = GROUND_Y + (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
@@ -90,7 +92,7 @@ class Cloud(pygame.sprite.Sprite):
         super().__init__((cloud_group))
         cloud_sprite_url = os.path.join('assets', 'cloud.png')
         self.image = pygame.transform.scale(pygame.image.load(cloud_sprite_url), (CLOUD_WIDTH, CLOUD_HEIGHT))
-        self.x_pos = SCREEN_WIDTH + round(SCREEN_WIDTH//12, -1)
+        self.x_pos = CLOUD_X
         self.y_pos = random.randint(CLOUD_Y_MIN, CLOUD_Y_MAX)
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
 
@@ -130,7 +132,6 @@ class Ptero(Obstacle):
                 pygame.image.load(os.path.join('assets', 'ptero', f'ptero{i}.png')), (PTERO_WIDTH, PTERO_HEIGHT))
             for i in range(1, 3)
         ]
-        self.current_image = 0
         super().__init__()
 
     def update(self):
@@ -159,7 +160,7 @@ class Dino(pygame.sprite.Sprite):
         ]
 
         self.sprites = self.running_sprites
-        self.x_pos = round(min(200, SCREEN_WIDTH//6), -1)
+        self.x_pos = DINO_X
         self.y_pos = RUNNING_DINO_Y
         self.current_image = 0
         self.image = self.sprites[self.current_image]
@@ -270,22 +271,14 @@ while True:
     if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
         GAME_OVER = True
         death_sfx.play()
-
-        score_cover = pygame.Surface((60, 30))
-        score_cover.fill(WHITE)
-        score_cover_rect = score_cover.get_rect(center=(1150, 10))
-        DISPLAYSURF.blit(score_cover, score_cover_rect)
         
-        game_over_text = font.render("Game Over", True, BLACK)
-        game_over_text_rect = game_over_text.get_rect(center=(640, 300))
+        game_over_text = font.render("G A M E   O V E R", True, BLACK)
+        game_over_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
         game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         game_over_screen_fade.fill(BLACK)
         game_over_screen_fade.set_alpha(160)
-        game_over_score = font.render(f'Score: {int(SCORE)}', True, BLACK)
-        game_over_score_rect = game_over_score.get_rect(center=(640, 340))
         DISPLAYSURF.blit(game_over_screen_fade, (0,0))
         DISPLAYSURF.blit(game_over_text, game_over_text_rect)
-        DISPLAYSURF.blit(game_over_score, game_over_score_rect)
 
     pygame.display.update()
     GameClock.tick(FPS)
