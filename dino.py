@@ -158,6 +158,10 @@ class Dino(pygame.sprite.Sprite):
                 pygame.image.load(os.path.join('assets', 'dino', f'dinoDucking{i}.png')), (DUCKING_DINO_WIDTH, DUCKING_DINO_HEIGHT))
             for i in range(1, 3)
         ]
+        self.jumping_sprites = [
+            pygame.transform.scale(
+                pygame.image.load(os.path.join('assets', 'dino', f'dinoJumping.png')), (RUNNING_DINO_WIDTH, RUNNING_DINO_HEIGHT))
+        ]
 
         self.sprites = self.running_sprites
         self.x_pos = DINO_X
@@ -171,6 +175,7 @@ class Dino(pygame.sprite.Sprite):
         jump_sfx.play()
         if self.rect.centery >= RUNNING_DINO_Y:
             self.rect.centery = JUMPING_DINO_Y
+        self.sprites = self.jumping_sprites
 
     def duck(self):
         self.ducking = True
@@ -185,6 +190,8 @@ class Dino(pygame.sprite.Sprite):
     def apply_gravity(self):
         if self.rect.centery < RUNNING_DINO_Y:
             self.rect.centery += GRAVITY
+        else:
+            self.sprites = self.running_sprites
 
     def update(self):
         self.animate()
@@ -194,7 +201,7 @@ class Dino(pygame.sprite.Sprite):
 
     def animate(self):
         self.current_image += 0.05
-        if self.current_image >= 2:
+        if self.current_image >= len(self.sprites):
             self.current_image = 0
 
         self.image = self.sprites[int(self.current_image)]
@@ -268,17 +275,17 @@ while True:
         GROUND_X = 0
 
     # Collisions
-    if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
-        GAME_OVER = True
-        death_sfx.play()
+    # if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
+    #     GAME_OVER = True
+    #     death_sfx.play()
         
-        game_over_text = font.render("G A M E   O V E R", True, BLACK)
-        game_over_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-        game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        game_over_screen_fade.fill(BLACK)
-        game_over_screen_fade.set_alpha(160)
-        DISPLAYSURF.blit(game_over_screen_fade, (0,0))
-        DISPLAYSURF.blit(game_over_text, game_over_text_rect)
+    #     game_over_text = font.render("G A M E   O V E R", True, BLACK)
+    #     game_over_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+    #     game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    #     game_over_screen_fade.fill(BLACK)
+    #     game_over_screen_fade.set_alpha(160)
+    #     DISPLAYSURF.blit(game_over_screen_fade, (0,0))
+    #     DISPLAYSURF.blit(game_over_text, game_over_text_rect)
 
     pygame.display.update()
     GameClock.tick(FPS)
