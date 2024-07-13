@@ -32,6 +32,9 @@ SPEED = round(SCREEN_WIDTH/250)
 SPEED_DELTA = SPEED*0.0005
 GRAVITY = round(SCREEN_HEIGHT/250)
 SCORE = 0
+OBSTACLE_TIMER = 0
+OBSTACLE_COOLDOWN = 1000
+OBSTACLE_COOLDOWN_DELTA = 0
 
 # Fonts
 font = pygame.font.Font(os.path.join('assets', 'PressStart2P-Regular.ttf'), 24)
@@ -54,11 +57,28 @@ RUNNING_DINO_HEIGHT = round(min(90, SCREEN_HEIGHT//8), -1)
 DUCKING_DINO_WIDTH = round(min(110, SCREEN_WIDTH//12), -1)
 DUCKING_DINO_HEIGHT = round(min(60, SCREEN_HEIGHT//12), -1)
 RUNNING_DINO_Y = GROUND_Y - (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
-JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*1.5
+JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*2.9
 DUCKING_DINO_Y = GROUND_Y + (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
+
+# Cactus Dimensions
+CACTUS_WIDTH = round(min(80, SCREEN_WIDTH//16), -1)
+CACTUS_HEIGHT = round(min(90, SCREEN_HEIGHT//8), -1)
+CACTUS_X = SCREEN_WIDTH
+CACTUS_Y = GROUND_Y - (SCREEN_HEIGHT)//48
+CACTUS_SPAWN_CHANCE = 60
+
+# Pterodactyl Dimensions
+PTERO_WIDTH = round(min(80, SCREEN_WIDTH//16), -1)
+PTERO_HEIGHT = round(min(90, SCREEN_HEIGHT//12), -1)
+PTERO_X = SCREEN_WIDTH
+PTERO_Y_HIGH = GROUND_Y - RUNNING_DINO_HEIGHT
+PTERO_Y_MED = GROUND_Y - DUCKING_DINO_HEIGHT
+PTERO_Y_LOW = GROUND_Y - (SCREEN_HEIGHT)//48
+PTERO_SPAWN_CHANCE = 40
 
 # Groups
 cloud_group = pygame.sprite.Group()
+obstacle_group = pygame.sprite.Group()
 dino_group = pygame.sprite.GroupSingle()
 
 # Object Classes
@@ -74,6 +94,50 @@ class Cloud(pygame.sprite.Sprite):
     def update(self):
         self.rect.x -= 1
 
+class Obstacle(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__((obstacle_group))
+        self.current_image = random.randint(0, len(self.sprites)-1)
+        self.image = self.sprites[self.current_image]
+        self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+
+    def update(self):
+        self.x_pos -= SPEED
+        self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+
+class Cactus(Obstacle):
+    def __init__(self):
+        self.x_pos = CACTUS_X
+        self.y_pos = CACTUS_Y
+        self.sprites = [
+            pygame.transform.scale(
+                pygame.image.load(os.path.join('assets', 'cactus', f'cactus{i}.png')), (CACTUS_WIDTH, CACTUS_HEIGHT))
+            for i in range(1, 7)
+        ]
+        super().__init__()
+
+class Ptero(Obstacle):
+    def __init__(self):
+        self.x_pos = PTERO_X
+        self.y_pos = random.choice([PTERO_Y_LOW, PTERO_Y_MED, PTERO_Y_HIGH])
+        self.sprites = [
+            pygame.transform.scale(
+                pygame.image.load(os.path.join('assets', 'ptero', f'ptero{i}.png')), (PTERO_WIDTH, PTERO_HEIGHT))
+            for i in range(1, 3)
+        ]
+        self.current_image = 0
+        super().__init__()
+
+    def update(self):
+        self.animate()
+        super().update()
+
+    def animate(self):
+        self.current_image += 0.025
+        if self.current_image >= 2:
+            self.current_image = 0
+        self.image = self.sprites[int(self.current_image)]
+
 class Dino(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__((dino_group))
@@ -87,12 +151,13 @@ class Dino(pygame.sprite.Sprite):
             pygame.transform.scale(
                 pygame.image.load(os.path.join('assets', 'dino', f'dinoDucking{i}.png')), (DUCKING_DINO_WIDTH, DUCKING_DINO_HEIGHT))
             for i in range(1, 3)
-        ]        
+        ]
 
+        self.sprites = self.running_sprites
         self.x_pos = round(min(200, SCREEN_WIDTH//6), -1)
         self.y_pos = RUNNING_DINO_Y
         self.current_image = 0
-        self.image = self.running_sprites[self.current_image]
+        self.image = self.sprites[self.current_image]
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.ducking = False
 
@@ -104,10 +169,12 @@ class Dino(pygame.sprite.Sprite):
     def duck(self):
         self.ducking = True
         self.rect.centery = DUCKING_DINO_Y
+        self.sprites = self.ducking_sprites
 
     def unduck(self):
         self.ducking = False
         self.rect.centery = RUNNING_DINO_Y
+        self.sprites = self.running_sprites
 
     def apply_gravity(self):
         if self.rect.centery < RUNNING_DINO_Y:
@@ -122,10 +189,7 @@ class Dino(pygame.sprite.Sprite):
         if self.current_image >= 2:
             self.current_image = 0
 
-        if self.ducking:
-            self.image = self.ducking_sprites[int(self.current_image)]
-        else:
-            self.image = self.running_sprites[int(self.current_image)]
+        self.image = self.sprites[int(self.current_image)]
 
 # Events
 CLOUD_EVENT = pygame.USEREVENT + 1
@@ -154,18 +218,30 @@ while True:
     
     DISPLAYSURF.fill(WHITE)
 
+    SCORE += 0.1
+    player_score_surface = font.render(str(int(SCORE)), True, (BLACK))
+    DISPLAYSURF.blit(player_score_surface, (SCREEN_WIDTH*0.9, 10))
+
     SPEED += SPEED_DELTA
     if int(SCORE) % 100 == 0 and int(SCORE) > 0:
         points_sfx.play()
 
-    SCORE += 0.1
-    player_score_surface = font.render(
-        str(int(SCORE)), True, (BLACK))
-    DISPLAYSURF.blit(player_score_surface, (SCREEN_WIDTH*0.9, 10))
+    if pygame.time.get_ticks() - OBSTACLE_TIMER >= OBSTACLE_COOLDOWN + OBSTACLE_COOLDOWN_DELTA and SCORE > 20:
+        if SCORE > 200:
+            obstacle_class = random.choices([Cactus, Ptero], weights=[6, 4])[0]
+        else:
+            obstacle_class = Cactus
+        new_obstacle = obstacle_class()
+        OBSTACLE_TIMER = pygame.time.get_ticks()
+        OBSTACLE_COOLDOWN_DELTA = random.randint(1, 40)
 
     # Draw Cloud
     cloud_group.update()
     cloud_group.draw(DISPLAYSURF)
+
+    # Draw Obstacle
+    obstacle_group.update()
+    obstacle_group.draw(DISPLAYSURF)
     
     # Draw Dinosaur
     dino_group.update()
