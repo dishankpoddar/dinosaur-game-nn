@@ -275,17 +275,17 @@ while True:
         GROUND_X = 0
 
     # Collisions
-    # if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
-    #     GAME_OVER = True
-    #     death_sfx.play()
+    if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
+        GAME_OVER = True
+        death_sfx.play()
         
-    #     game_over_text = font.render("G A M E   O V E R", True, BLACK)
-    #     game_over_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-    #     game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    #     game_over_screen_fade.fill(BLACK)
-    #     game_over_screen_fade.set_alpha(160)
-    #     DISPLAYSURF.blit(game_over_screen_fade, (0,0))
-    #     DISPLAYSURF.blit(game_over_text, game_over_text_rect)
+        game_over_text = font.render("G A M E   O V E R", True, BLACK)
+        game_over_text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+        game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        game_over_screen_fade.fill(BLACK)
+        game_over_screen_fade.set_alpha(160)
+        DISPLAYSURF.blit(game_over_screen_fade, (0,0))
+        DISPLAYSURF.blit(game_over_text, game_over_text_rect)
 
     pygame.display.update()
     GameClock.tick(FPS)
