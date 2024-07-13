@@ -24,6 +24,7 @@ DISPLAYSURF.fill(WHITE)
 pygame.display.set_caption('Dinosaur Game')
 
 # Sounds
+death_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', 'lose.mp3'))
 points_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', '100points.mp3'))
 jump_sfx = pygame.mixer.Sound(os.path.join('assets', 'sfx', 'jump.mp3'))
 
@@ -35,6 +36,7 @@ SCORE = 0
 OBSTACLE_TIMER = 0
 OBSTACLE_COOLDOWN = 1000
 OBSTACLE_COOLDOWN_DELTA = 0
+GAME_OVER = False
 
 # Fonts
 font = pygame.font.Font(os.path.join('assets', 'PressStart2P-Regular.ttf'), 24)
@@ -57,7 +59,7 @@ RUNNING_DINO_HEIGHT = round(min(90, SCREEN_HEIGHT//8), -1)
 DUCKING_DINO_WIDTH = round(min(110, SCREEN_WIDTH//12), -1)
 DUCKING_DINO_HEIGHT = round(min(60, SCREEN_HEIGHT//12), -1)
 RUNNING_DINO_Y = GROUND_Y - (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
-JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*2.9
+JUMPING_DINO_Y = RUNNING_DINO_Y - RUNNING_DINO_HEIGHT*2.75
 DUCKING_DINO_Y = GROUND_Y + (RUNNING_DINO_HEIGHT - DUCKING_DINO_HEIGHT)//2
 
 # Cactus Dimensions
@@ -216,6 +218,9 @@ while True:
             if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                 dinosaur.jump()
     
+    if GAME_OVER:
+        continue
+
     DISPLAYSURF.fill(WHITE)
 
     SCORE += 0.1
@@ -255,6 +260,27 @@ while True:
 
     if GROUND_X <= -SCREEN_WIDTH:
         GROUND_X = 0
+
+    # Collisions
+    if pygame.sprite.spritecollide(dino_group.sprite, obstacle_group, False):
+        GAME_OVER = True
+        death_sfx.play()
+
+        score_cover = pygame.Surface((60, 30))
+        score_cover.fill(WHITE)
+        score_cover_rect = score_cover.get_rect(center=(1150, 10))
+        DISPLAYSURF.blit(score_cover, score_cover_rect)
+        
+        game_over_text = font.render("Game Over", True, BLACK)
+        game_over_text_rect = game_over_text.get_rect(center=(640, 300))
+        game_over_screen_fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        game_over_screen_fade.fill(BLACK)
+        game_over_screen_fade.set_alpha(160)
+        game_over_score = font.render(f'Score: {int(SCORE)}', True, BLACK)
+        game_over_score_rect = game_over_score.get_rect(center=(640, 340))
+        DISPLAYSURF.blit(game_over_screen_fade, (0,0))
+        DISPLAYSURF.blit(game_over_text, game_over_text_rect)
+        DISPLAYSURF.blit(game_over_score, game_over_score_rect)
 
     pygame.display.update()
     GameClock.tick(FPS)
